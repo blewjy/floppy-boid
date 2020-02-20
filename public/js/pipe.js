@@ -10,32 +10,33 @@ import {
     pipeGap,
     pipeMinHeight,
     pipeMaxHeight,
-    pipeRemoveX,
-    gameWidth
+    pipeRemoveX
 } from "./settings.js";
 import { Game } from "./game.js";
 
 class Pipe {
     constructor(pipeTopHeight) {
-        this.startingX = pipeStartingX;
-        this.width = pipeWidth;
-        this.holeHeight = pipeHoleHeight;
         this.topHeight = pipeTopHeight;
-        this.botHeight = gameHeight - pipeTopHeight - this.holeHeight;
-        this.topPos = new Vector2(this.startingX, 0);
+        this.botHeight = gameHeight - pipeTopHeight - pipeHoleHeight;
+        this.topPos = new Vector2(pipeStartingX, 0);
         this.botPos = new Vector2(
-            this.startingX,
-            pipeTopHeight + this.holeHeight
+            pipeStartingX,
+            pipeTopHeight + pipeHoleHeight
         );
-        this.speed = pipeMoveSpeed;
         this.passed = false;
     }
     update(deltaTime) {
-        this.topPos.set(this.topPos.x + this.speed * deltaTime, this.topPos.y);
-        this.botPos.set(this.botPos.x + this.speed * deltaTime, this.botPos.y);
+        this.topPos.set(
+            this.topPos.x + pipeMoveSpeed * deltaTime,
+            this.topPos.y
+        );
+        this.botPos.set(
+            this.botPos.x + pipeMoveSpeed * deltaTime,
+            this.botPos.y
+        );
         if (
             !this.passed &&
-            this.topPos.x + this.width / 2 <= boidStartingX + boidWidth / 2
+            this.topPos.x + pipeWidth / 2 <= boidStartingX + boidWidth / 2
         ) {
             this.passed = true;
             Game.addScore();
@@ -46,19 +47,19 @@ class Pipe {
         context.fillRect(
             this.topPos.x,
             this.topPos.y,
-            this.width,
+            pipeWidth,
             this.topHeight
         );
         context.fillRect(
             this.botPos.x,
             this.botPos.y,
-            this.width,
+            pipeWidth,
             this.botHeight
         );
         context.strokeStyle = "black";
         context.beginPath();
-        context.moveTo(this.topPos.x + this.width / 2, 0);
-        context.lineTo(this.botPos.x + this.width / 2, gameHeight);
+        context.moveTo(this.topPos.x + pipeWidth / 2, 0);
+        context.lineTo(this.botPos.x + pipeWidth / 2, gameHeight);
         context.stroke();
     }
 }
