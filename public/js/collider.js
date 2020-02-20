@@ -13,13 +13,13 @@ export class Collider {
                 this.boid.pos.x,
                 gameHeight - gameGroundHeight - boidHeight
             );
-            this.boid.kill();
+            Game.gameOver();
         }
         this.pipes.forEach(pipe => {
             const y = this.boid.hits(pipe);
             if (y !== -1) {
                 this.boid.pos.set(this.boid.pos.x, y);
-                Game.stop();
+                Game.gameOver();
             }
         });
     }

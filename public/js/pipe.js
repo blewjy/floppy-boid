@@ -76,7 +76,7 @@ export class PipeGenerator {
      * TODO: Refactor to not hardcode!!
      */
     collided() {
-        if (this.pipes.length == 2) {
+        if (this.pipes.length == 3) {
             this.pipes[0].topPos.set(boidStartingX + boidWidth, 0);
             this.pipes[0].botPos.set(
                 boidStartingX + boidWidth,
@@ -90,7 +90,7 @@ export class PipeGenerator {
                 boidStartingX + boidWidth + pipeWidth + this.pipeGap,
                 this.pipes[1].botPos.y
             );
-        } else if (this.pipes.length === 3) {
+        } else if (this.pipes.length === 4) {
             this.pipes[0].topPos.set(
                 boidStartingX + boidWidth - this.pipeGap - pipeWidth,
                 0

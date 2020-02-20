@@ -19,6 +19,8 @@ export class Game {
         this.score = 0;
 
         this.isRunning = false;
+        this.isPipesComing = false;
+        this.isGameOver = false;
     }
 
     static init() {
@@ -27,6 +29,7 @@ export class Game {
             if (event.code === "Space") {
                 Game.boid.jump();
                 Game.pipeGenerator.start();
+                Game.isPipesComing = true;
             }
         });
     }
@@ -40,6 +43,11 @@ export class Game {
 
     static stop() {
         Game.isRunning = false;
+    }
+
+    static gameOver() {
+        Game.stop();
+        Game.isGameOver = true;
     }
 
     static loop(timestamp) {
@@ -70,6 +78,14 @@ export class Game {
         Game.context.font = "bold 40px Georgia";
         Game.context.textAlign = "center";
         Game.context.fillText(Game.score, gameWidth / 2, 60);
+
+        if (!Game.isPipesComing) {
+            Game.context.fillText("Get Ready", gameWidth / 2, 200);
+        }
+
+        if (Game.isGameOver) {
+            Game.context.fillText("Game Over!", gameWidth / 2, 200);
+        }
 
         if (Game.isRunning) {
             requestAnimationFrame(timestamp => Game.loop(timestamp));
@@ -102,6 +118,22 @@ export class Game {
 
     static set isRunning(isRunning) {
         Game.instance.isRunning = isRunning;
+    }
+
+    static get isPipesComing() {
+        return Game.instance.isPipesComing;
+    }
+
+    static set isPipesComing(isPipesComing) {
+        Game.instance.isPipesComing = isPipesComing;
+    }
+
+    static get isGameOver() {
+        return Game.instance.isGameOver;
+    }
+
+    static set isGameOver(isGameOver) {
+        Game.instance.isGameOver = isGameOver;
     }
 
     static get deltaTime() {

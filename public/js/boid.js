@@ -118,8 +118,4 @@ export class Boid {
         }
         return -1;
     }
-
-    kill() {
-        Game.stop();
-    }
 }
