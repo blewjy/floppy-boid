@@ -18,8 +18,17 @@ class Vector2 {
     }
 }
 
-class Boid {
+class Entity {
+    constructor(type) {
+        this.type = type;
+    }
+}
+
+class Boid extends Entity {
     constructor() {
+        super("boid");
+        this.width = 32;
+        this.height = 32;
         this.pos = new Vector2(150, 250);
         this.vel = new Vector2(0, 0);
         this.grav = 2400;
@@ -41,16 +50,30 @@ class Boid {
 
     render(context) {
         context.fillStyle = "yellow";
-        context.fillRect(this.pos.x, this.pos.y, 32, 32);
+        context.fillRect(this.pos.x, this.pos.y, this.width, this.height);
     }
     jump() {
         this.isStarted = true;
         this.vel.y = -700;
     }
+    hits(pipe) {
+        return (
+            (this.pos.y < pipe.topHeight &&
+                this.pos.x + this.width > pipe.topPos.x &&
+                this.pos.x < pipe.topPos.x + pipe.width) ||
+            (this.pos.y + this.height > pipe.topHeight + pipe.holeHeight &&
+                this.pos.x + this.width > pipe.topPos.x &&
+                this.pos.x < pipe.topPos.x + pipe.width)
+        );
+    }
+    kill(y) {
+        this.pos.set(this.pos.x, y);
+    }
 }
 
-class Pipe {
+class Pipe extends Entity {
     constructor(topHeight) {
+        super("pipe");
         this.startingX = 800;
         this.width = 100;
         this.holeHeight = 250;
@@ -124,9 +147,28 @@ class PipeGenerator {
     }
 }
 
+class Collider {
+    constructor(boid, pipes) {
+        this.boid = boid;
+        this.pipes = pipes;
+    }
+
+    check() {
+        if (this.boid.pos.y >= 518) {
+            this.boid.kill(518);
+        }
+        this.pipes.forEach(pipe => {
+            if (this.boid.hits(pipe)) {
+                this.boid.kill();
+            }
+        });
+    }
+}
+
 let lastTime = 0;
 const boid = new Boid();
 const pipeGenerator = new PipeGenerator();
+const collider = new Collider(boid, pipeGenerator.pipes);
 
 function loop(timestamp) {
     const deltaTime = timestamp - lastTime;
@@ -134,9 +176,12 @@ function loop(timestamp) {
 
     boid.update(deltaTime);
     pipeGenerator.update(deltaTime);
+    collider.check();
 
     context.fillStyle = "skyblue";
     context.fillRect(0, 0, 400, 600);
+    context.fillStyle = "brown";
+    context.fillRect(0, 550, 400, 50);
     pipeGenerator.render(context);
     boid.render(context);
 
@@ -151,3 +196,9 @@ window.addEventListener("keydown", event => {
 });
 
 requestAnimationFrame(loop);
+
+
+/**
+ * TODO:
+ * - Wrap all in Game object that can start and stop your update and render loops, and show menu, etc.
+ */
