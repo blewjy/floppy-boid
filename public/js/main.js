@@ -7,8 +7,12 @@ const Sides = {
     TOP: "top",
     BOTTOM: "bottom",
     LEFT: "left",
-    NONE: "none",
+    NONE: "none"
 };
+
+const boidX = 150;
+const boidWidth = 32;
+const pipeWidth = 100;
 
 class Vector2 {
     constructor(x, y) {
@@ -31,9 +35,9 @@ class Entity {
 class Boid extends Entity {
     constructor() {
         super("boid");
-        this.width = 32;
+        this.width = boidWidth;
         this.height = 32;
-        this.pos = new Vector2(150, 250);
+        this.pos = new Vector2(boidX, 250);
         this.vel = new Vector2(0, 0);
         this.grav = 2400;
         this.isStarted = false;
@@ -61,36 +65,89 @@ class Boid extends Entity {
         this.vel.y = -700;
     }
 
-    // TODO: Buggy, not perfect. 
-    //       - boid.pos.x should not change. 
+    // TODO: Buggy, not perfect.
+    //       - boid.pos.x should not change.
     hits(pipe) {
+        let left = 0;
+        let bottom = 0;
         if (
-            this.pos.y < pipe.topHeight &&
-            this.pos.x < pipe.topPos.x + pipe.width
+            this.pos.x < pipe.topPos.x + pipe.width &&
+            this.pos.x + this.width > pipe.topPos.x &&
+            this.pos.y < pipe.topPos.y + pipe.topHeight &&
+            this.pos.y + this.height > pipe.topPos.y
         ) {
-            if (this.pos.x > pipe.topPos.x) {
-                // from bottom
-                return new Vector2(this.pos.x, pipe.topHeight);
-            } else if (this.pos.x + this.width > pipe.topPos.x) {
-                // from left side
-                return new Vector2(pipe.topPos.x - this.width, this.pos.y);
+            if (
+                this.pos.x < pipe.topPos.x &&
+                this.pos.x + this.width > pipe.topPos.x
+            ) {
+                left = this.pos.x + this.width - pipe.topPos.x;
             }
-        }
 
-        if (this.pos.y + this.height > pipe.topHeight + pipe.holeHeight) {
-            if (this.pos.x > pipe.topPos.x) {
-                // from top
-                return new Vector2(
-                    this.pos.x,
-                    pipe.topHeight + pipe.holeHeight - this.height
+            if (
+                this.pos.y < pipe.topPos.y + pipe.topHeight &&
+                this.pos.y + this.height > pipe.topPos.y + pipe.topHeight
+            ) {
+                bottom = pipe.topPos.y + pipe.topHeight - this.pos.y;
+            }
+
+            if (left === 0 && bottom === 0) {
+                throw new Error("WTFBBQ");
+            } else if (left === 0) {
+                console.log("Hit from bottom");
+                return pipe.topPos.y + pipe.topHeight;
+            } else if (bottom === 0) {
+                console.log("Hit from left");
+                Game.pipeGenerator.collided();
+                return this.pos.y;
+            } else {
+                console.log(
+                    left < bottom ? "Hit from left" : "Hit from bottom"
                 );
-            } else if (this.pos.x + this.width > pipe.botPos.x) {
-                // from left side
-                return new Vector2(pipe.topPos.x - this.width, this.pos.y);
+                return left < bottom
+                    ? this.pos.y
+                    : pipe.topPos.y + pipe.topHeight;
             }
+
+            return true;
         }
 
-        return undefined;
+        left = 0;
+        let top = 0;
+        if (
+            this.pos.x < pipe.botPos.x + pipe.width &&
+            this.pos.x + this.width > pipe.botPos.x &&
+            this.pos.y < pipe.botPos.y + pipe.botHeight &&
+            this.pos.y + this.height > pipe.botPos.y
+        ) {
+            if (
+                this.pos.x < pipe.botPos.x &&
+                this.pos.x + this.width > pipe.botPos.x
+            ) {
+                left = this.pos.x + this.width - pipe.botPos.x;
+            }
+
+            if (
+                this.pos.y + this.height > pipe.botPos.y &&
+                this.pos.y < pipe.botPos.y
+            ) {
+                top = this.height + this.pos.y - pipe.botPos.y;
+            }
+
+            if (left === 0 && top === 0) {
+                throw new Error("WTFBBQ");
+            } else if (left === 0) {
+                console.log("Hit from top");
+                return pipe.botPos.y - this.height;
+            } else if (top === 0) {
+                console.log("Hit from left");
+                Game.pipeGenerator.collided();
+                return this.pos.y;
+            } else {
+                console.log(left < top ? "Hit from left" : "Hit from top");
+                return left < top ? this.pos.y : pipe.botPos.y - this.height;
+            }
+        }
+        return -1;
     }
     kill() {
         Game.stop();
@@ -98,10 +155,10 @@ class Boid extends Entity {
 }
 
 class Pipe extends Entity {
-    constructor(topHeight) {
+    constructor(topHeight, startingX) {
         super("pipe");
-        this.startingX = 800;
-        this.width = 100;
+        this.startingX = startingX;
+        this.width = pipeWidth;
         this.holeHeight = 250;
         this.topHeight = topHeight;
         this.botHeight = 600 - topHeight - this.holeHeight;
@@ -138,19 +195,67 @@ class Pipe extends Entity {
 
 class PipeGenerator {
     constructor() {
+        this.startingX = 400;
+        this.pipeGap = 100;
         this.pipes = [];
         this.lastPipe = null;
         this.isStarted = false;
     }
+
+    collided() {
+        if (this.pipes.length == 2) {
+            this.pipes[0].topPos.set(boidX + boidWidth, 0);
+            this.pipes[0].botPos.set(boidX + boidWidth, this.pipes[0].botPos.y);
+            this.pipes[1].topPos.set(
+                boidX + boidWidth + pipeWidth + this.pipeGap,
+                0
+            );
+            this.pipes[1].botPos.set(
+                boidX + boidWidth + pipeWidth + this.pipeGap,
+                this.pipes[1].botPos.y
+            );
+        } else if (this.pipes.length === 3) {
+            this.pipes[0].topPos.set(
+                boidX + boidWidth - this.pipeGap - pipeWidth,
+                0
+            );
+            this.pipes[0].botPos.set(
+                boidX + boidWidth - this.pipeGap - pipeWidth,
+                this.pipes[0].botPos.y
+            );
+            this.pipes[1].topPos.set(boidX + boidWidth, 0);
+            this.pipes[1].botPos.set(boidX + boidWidth, this.pipes[1].botPos.y);
+            this.pipes[2].topPos.set(
+                boidX + boidWidth + pipeWidth + this.pipeGap,
+                0
+            );
+            this.pipes[2].botPos.set(
+                boidX + boidWidth + pipeWidth + this.pipeGap,
+                this.pipes[2].botPos.y
+            );
+        } else {
+            throw new Error("GGWP");
+        }
+    }
+
     update(deltaTime) {
         if (this.isStarted) {
             if (this.pipes.length === 0) {
-                const pipe = new Pipe(randomIntFromInterval(50, 250));
+                const pipe = new Pipe(
+                    randomIntFromInterval(50, 250),
+                    this.startingX
+                );
                 this.pipes.push(pipe);
                 this.lastPipe = pipe;
             } else {
-                if (this.lastPipe.topPos.x <= 500) {
-                    const pipe = new Pipe(randomIntFromInterval(50, 250));
+                if (
+                    this.lastPipe.topPos.x <=
+                    this.startingX - this.pipeGap - pipeWidth
+                ) {
+                    const pipe = new Pipe(
+                        randomIntFromInterval(50, 250),
+                        this.startingX
+                    );
                     this.pipes.push(pipe);
                     this.lastPipe = pipe;
                 }
@@ -185,11 +290,10 @@ class Collider {
             this.boid.kill();
         }
         this.pipes.forEach(pipe => {
-            const pos = this.boid.hits(pipe);
-            if (pos !== undefined) {
-                console.log(pos);
-                this.boid.pos.set(pos.x, pos.y);
-                this.boid.kill();
+            const y = this.boid.hits(pipe);
+            if (y !== -1) {
+                this.boid.pos.set(this.boid.pos.x, y);
+                Game.stop();
             }
         });
     }
@@ -201,6 +305,10 @@ class Collider {
  */
 
 class Game {
+    static get pipeGenerator() {
+        return Game.instance.pipeGenerator;
+    }
+
     constructor() {
         Game.instance = this;
 
