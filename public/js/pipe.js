@@ -10,8 +10,10 @@ import {
     pipeGap,
     pipeMinHeight,
     pipeMaxHeight,
-    pipeRemoveX
+    pipeRemoveX,
+    gameWidth
 } from "./settings.js";
+import { Game } from "./game.js";
 
 class Pipe {
     constructor(pipeTopHeight) {
@@ -26,10 +28,18 @@ class Pipe {
             pipeTopHeight + this.holeHeight
         );
         this.speed = pipeMoveSpeed;
+        this.passed = false;
     }
     update(deltaTime) {
         this.topPos.set(this.topPos.x + this.speed * deltaTime, this.topPos.y);
         this.botPos.set(this.botPos.x + this.speed * deltaTime, this.botPos.y);
+        if (
+            !this.passed &&
+            this.topPos.x + this.width / 2 <= boidStartingX + boidWidth / 2
+        ) {
+            this.passed = true;
+            Game.addScore();
+        }
     }
     render(context) {
         context.fillStyle = "green";
@@ -45,6 +55,11 @@ class Pipe {
             this.width,
             this.botHeight
         );
+        context.strokeStyle = "black";
+        context.beginPath();
+        context.moveTo(this.topPos.x + this.width / 2, 0);
+        context.lineTo(this.botPos.x + this.width / 2, gameHeight);
+        context.stroke();
     }
 }
 

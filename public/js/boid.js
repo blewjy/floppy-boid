@@ -32,6 +32,11 @@ export class Boid {
     render(context) {
         context.fillStyle = "yellow";
         context.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+        context.strokeStyle = "black";
+        context.beginPath();
+        context.moveTo(this.pos.x + this.width / 2, this.pos.y);
+        context.lineTo(this.pos.x + this.width / 2, this.pos.y + this.height);
+        context.stroke();
     }
     jump() {
         this.isStarted = true;

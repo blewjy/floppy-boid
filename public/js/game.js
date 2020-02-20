@@ -16,6 +16,8 @@ export class Game {
         this.pipeGenerator = new PipeGenerator();
         this.collider = new Collider(this.boid, this.pipeGenerator.pipes);
 
+        this.score = 0;
+
         this.isRunning = false;
     }
 
@@ -64,10 +66,18 @@ export class Game {
         );
         Game.pipeGenerator.render(Game.context);
         Game.boid.render(Game.context);
+        Game.context.fillStyle = "white";
+        Game.context.font = "bold 40px Georgia";
+        Game.context.textAlign = "center";
+        Game.context.fillText(Game.score, gameWidth / 2, 60);
 
         if (Game.isRunning) {
             requestAnimationFrame(timestamp => Game.loop(timestamp));
         }
+    }
+
+    static addScore() {
+        Game.instance.score += 1;
     }
 
     static get boid() {
@@ -108,5 +118,9 @@ export class Game {
 
     static set lastTime(lastTime) {
         Game.instance.lastTime = lastTime;
+    }
+
+    static get score() {
+        return Game.instance.score;
     }
 }
