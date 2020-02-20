@@ -1,10 +1,14 @@
-const canvas = document.getElementById("screen");
-const context = canvas.getContext("2d");
-
 function randomIntFromInterval(min, max) {
     // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+const Sides = {
+    TOP: "top",
+    BOTTOM: "bottom",
+    LEFT: "left",
+    NONE: "none",
+};
 
 class Vector2 {
     constructor(x, y) {
@@ -56,18 +60,40 @@ class Boid extends Entity {
         this.isStarted = true;
         this.vel.y = -700;
     }
+
+    // TODO: Buggy, not perfect. 
+    //       - boid.pos.x should not change. 
     hits(pipe) {
-        return (
-            (this.pos.y < pipe.topHeight &&
-                this.pos.x + this.width > pipe.topPos.x &&
-                this.pos.x < pipe.topPos.x + pipe.width) ||
-            (this.pos.y + this.height > pipe.topHeight + pipe.holeHeight &&
-                this.pos.x + this.width > pipe.topPos.x &&
-                this.pos.x < pipe.topPos.x + pipe.width)
-        );
+        if (
+            this.pos.y < pipe.topHeight &&
+            this.pos.x < pipe.topPos.x + pipe.width
+        ) {
+            if (this.pos.x > pipe.topPos.x) {
+                // from bottom
+                return new Vector2(this.pos.x, pipe.topHeight);
+            } else if (this.pos.x + this.width > pipe.topPos.x) {
+                // from left side
+                return new Vector2(pipe.topPos.x - this.width, this.pos.y);
+            }
+        }
+
+        if (this.pos.y + this.height > pipe.topHeight + pipe.holeHeight) {
+            if (this.pos.x > pipe.topPos.x) {
+                // from top
+                return new Vector2(
+                    this.pos.x,
+                    pipe.topHeight + pipe.holeHeight - this.height
+                );
+            } else if (this.pos.x + this.width > pipe.botPos.x) {
+                // from left side
+                return new Vector2(pipe.topPos.x - this.width, this.pos.y);
+            }
+        }
+
+        return undefined;
     }
-    kill(y) {
-        this.pos.set(this.pos.x, y);
+    kill() {
+        Game.stop();
     }
 }
 
@@ -155,50 +181,82 @@ class Collider {
 
     check() {
         if (this.boid.pos.y >= 518) {
-            this.boid.kill(518);
+            this.boid.pos.set(this.boid.pos.x, 518);
+            this.boid.kill();
         }
         this.pipes.forEach(pipe => {
-            if (this.boid.hits(pipe)) {
+            const pos = this.boid.hits(pipe);
+            if (pos !== undefined) {
+                console.log(pos);
+                this.boid.pos.set(pos.x, pos.y);
                 this.boid.kill();
             }
         });
     }
 }
 
-let lastTime = 0;
-const boid = new Boid();
-const pipeGenerator = new PipeGenerator();
-const collider = new Collider(boid, pipeGenerator.pipes);
-
-function loop(timestamp) {
-    const deltaTime = timestamp - lastTime;
-    lastTime = timestamp;
-
-    boid.update(deltaTime);
-    pipeGenerator.update(deltaTime);
-    collider.check();
-
-    context.fillStyle = "skyblue";
-    context.fillRect(0, 0, 400, 600);
-    context.fillStyle = "brown";
-    context.fillRect(0, 550, 400, 50);
-    pipeGenerator.render(context);
-    boid.render(context);
-
-    requestAnimationFrame(loop);
-}
-
-window.addEventListener("keydown", event => {
-    if (event.code === "Space") {
-        boid.jump();
-        pipeGenerator.start();
-    }
-});
-
-requestAnimationFrame(loop);
-
-
 /**
  * TODO:
  * - Wrap all in Game object that can start and stop your update and render loops, and show menu, etc.
  */
+
+class Game {
+    constructor() {
+        Game.instance = this;
+
+        this.canvas = document.getElementById("screen");
+        this.context = this.canvas.getContext("2d");
+        this.lastTime = 0;
+        this.deltaTime = 0;
+
+        this.boid = new Boid();
+        this.pipeGenerator = new PipeGenerator();
+        this.collider = new Collider(this.boid, this.pipeGenerator.pipes);
+
+        this.isRunning = false;
+
+        window.addEventListener("keydown", event => {
+            if (event.code === "Space") {
+                this.boid.jump();
+                this.pipeGenerator.start();
+            }
+        });
+    }
+
+    static loop(timestamp) {
+        Game.instance.deltaTime = timestamp - Game.instance.lastTime;
+        Game.instance.lastTime = timestamp;
+        Game.instance.boid.update(Game.instance.deltaTime);
+        Game.instance.pipeGenerator.update(Game.instance.deltaTime);
+        Game.instance.collider.check();
+
+        Game.instance.context.fillStyle = "skyblue";
+        Game.instance.context.fillRect(0, 0, 400, 600);
+        Game.instance.context.fillStyle = "brown";
+        Game.instance.context.fillRect(0, 550, 400, 50);
+        Game.instance.pipeGenerator.render(Game.instance.context);
+        Game.instance.boid.render(Game.instance.context);
+
+        if (Game.instance.isRunning) {
+            requestAnimationFrame(timestamp => Game.loop(timestamp));
+        }
+    }
+
+    static init() {
+        new Game();
+    }
+
+    static start() {
+        Game.instance.isRunning = true;
+        if (Game.instance.isRunning) {
+            requestAnimationFrame(timestamp => Game.loop(timestamp));
+        }
+    }
+
+    static stop() {
+        Game.instance.isRunning = false;
+    }
+}
+
+Game.init();
+Game.start();
