@@ -30,12 +30,23 @@ export class Game {
                 Game.boid.jump();
                 Game.pipeGenerator.start();
                 Game.isPipesComing = true;
+            } else if (event.code === "Enter" && Game.isGameOver) {
+                Game.reset();
+                Game.start();
             }
         });
     }
 
+    static reset() {
+        Game.boid.reset();
+        Game.pipeGenerator.reset();
+        Game.score = 0;
+        Game.isPipesComing = false;
+    }
+
     static start() {
         Game.isRunning = true;
+        Game.isGameOver = false;
         if (Game.isRunning) {
             requestAnimationFrame(timestamp => Game.loop(timestamp));
         }
@@ -85,6 +96,12 @@ export class Game {
 
         if (Game.isGameOver) {
             Game.context.fillText("Game Over!", gameWidth / 2, 200);
+            Game.context.font = "30px Georgia";
+            Game.context.fillText(
+                'Press "Enter" to restart',
+                gameWidth / 2,
+                250
+            );
         }
 
         if (Game.isRunning) {
@@ -154,5 +171,9 @@ export class Game {
 
     static get score() {
         return Game.instance.score;
+    }
+
+    static set score(score) {
+        Game.instance.score = score;
     }
 }

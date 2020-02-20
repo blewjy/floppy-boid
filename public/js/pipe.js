@@ -66,8 +66,13 @@ class Pipe {
 
 export class PipeGenerator {
     constructor() {
-        this.pipeGap = pipeGap;
         this.pipes = [];
+        this.lastPipe = null;
+        this.isStarted = false;
+    }
+
+    reset() {
+        this.pipes.length = 0;
         this.lastPipe = null;
         this.isStarted = false;
     }
@@ -83,20 +88,20 @@ export class PipeGenerator {
                 this.pipes[0].botPos.y
             );
             this.pipes[1].topPos.set(
-                boidStartingX + boidWidth + pipeWidth + this.pipeGap,
+                boidStartingX + boidWidth + pipeWidth + pipeGap,
                 0
             );
             this.pipes[1].botPos.set(
-                boidStartingX + boidWidth + pipeWidth + this.pipeGap,
+                boidStartingX + boidWidth + pipeWidth + pipeGap,
                 this.pipes[1].botPos.y
             );
         } else if (this.pipes.length === 4) {
             this.pipes[0].topPos.set(
-                boidStartingX + boidWidth - this.pipeGap - pipeWidth,
+                boidStartingX + boidWidth - pipeGap - pipeWidth,
                 0
             );
             this.pipes[0].botPos.set(
-                boidStartingX + boidWidth - this.pipeGap - pipeWidth,
+                boidStartingX + boidWidth - pipeGap - pipeWidth,
                 this.pipes[0].botPos.y
             );
             this.pipes[1].topPos.set(boidStartingX + boidWidth, 0);
@@ -105,11 +110,11 @@ export class PipeGenerator {
                 this.pipes[1].botPos.y
             );
             this.pipes[2].topPos.set(
-                boidStartingX + boidWidth + pipeWidth + this.pipeGap,
+                boidStartingX + boidWidth + pipeWidth + pipeGap,
                 0
             );
             this.pipes[2].botPos.set(
-                boidStartingX + boidWidth + pipeWidth + this.pipeGap,
+                boidStartingX + boidWidth + pipeWidth + pipeGap,
                 this.pipes[2].botPos.y
             );
         } else {
@@ -128,7 +133,7 @@ export class PipeGenerator {
             } else {
                 if (
                     this.lastPipe.topPos.x <=
-                    pipeStartingX - this.pipeGap - pipeWidth
+                    pipeStartingX - pipeGap - pipeWidth
                 ) {
                     const pipe = new Pipe(
                         randomIntFromInterval(pipeMinHeight, pipeMaxHeight)

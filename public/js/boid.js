@@ -17,6 +17,12 @@ export class Boid {
         this.isStarted = false;
     }
 
+    reset() {
+        this.pos.set(boidStartingX, boidStartingY);
+        this.vel = new Vector2(0, 0);
+        this.isStarted = false;
+    }
+
     update(deltaTime) {
         if (this.isStarted) {
             this.vel.set(this.vel.x, this.vel.y + boidGrav * deltaTime);
