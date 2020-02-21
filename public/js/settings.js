@@ -10,10 +10,10 @@ export const boidGrav = 2400;
 export const boidJumpVel = -700;
 
 export const pipeWidth = 100;
-export const pipeHoleHeight = 250;
+export const pipeHoleHeight = 230;
 export const pipeMoveSpeed = -120;
 export const pipeStartingX = 600;
-export const pipeGap = 100;
+export const pipeGap = 120;
 export const pipeMinHeight = 50;
 export const pipeMaxHeight = 250;
 export const pipeRemoveX = -100;

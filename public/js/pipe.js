@@ -77,48 +77,43 @@ export class PipeGenerator {
         this.isStarted = false;
     }
 
-    /**
-     * TODO: Refactor to not hardcode!!
-     */
-    collided() {
-        if (this.pipes.length == 3) {
-            this.pipes[0].topPos.set(boidStartingX + boidWidth, 0);
-            this.pipes[0].botPos.set(
-                boidStartingX + boidWidth,
-                this.pipes[0].botPos.y
-            );
-            this.pipes[1].topPos.set(
-                boidStartingX + boidWidth + pipeWidth + pipeGap,
-                0
-            );
-            this.pipes[1].botPos.set(
-                boidStartingX + boidWidth + pipeWidth + pipeGap,
-                this.pipes[1].botPos.y
-            );
-        } else if (this.pipes.length === 4) {
-            this.pipes[0].topPos.set(
-                boidStartingX + boidWidth - pipeGap - pipeWidth,
-                0
-            );
-            this.pipes[0].botPos.set(
-                boidStartingX + boidWidth - pipeGap - pipeWidth,
-                this.pipes[0].botPos.y
-            );
-            this.pipes[1].topPos.set(boidStartingX + boidWidth, 0);
-            this.pipes[1].botPos.set(
-                boidStartingX + boidWidth,
-                this.pipes[1].botPos.y
-            );
-            this.pipes[2].topPos.set(
-                boidStartingX + boidWidth + pipeWidth + pipeGap,
-                0
-            );
-            this.pipes[2].botPos.set(
-                boidStartingX + boidWidth + pipeWidth + pipeGap,
-                this.pipes[2].botPos.y
-            );
-        } else {
-            throw new Error("GGWP");
+    collided(pipe) {
+        const index = this.pipes.findIndex(p => p === pipe);
+        for (let i = 0; i < this.pipes.length; i++) {
+            const currentPipe = this.pipes[i];
+            if (i < index) {
+                currentPipe.topPos.set(
+                    boidStartingX +
+                        boidWidth -
+                        (index - i) * (pipeWidth + pipeGap),
+                    0
+                );
+                currentPipe.botPos.set(
+                    boidStartingX +
+                        boidWidth -
+                        (index - i) * (pipeWidth + pipeGap),
+                    currentPipe.botPos.y
+                );
+            } else if (i > index) {
+                currentPipe.topPos.set(
+                    boidStartingX +
+                        boidWidth +
+                        (i - index) * (pipeWidth + pipeGap),
+                    0
+                );
+                currentPipe.botPos.set(
+                    boidStartingX +
+                        boidWidth +
+                        (i - index) * (pipeWidth + pipeGap),
+                    currentPipe.botPos.y
+                );
+            } else {
+                currentPipe.topPos.set(boidStartingX + boidWidth, 0);
+                currentPipe.botPos.set(
+                    boidStartingX + boidWidth,
+                    currentPipe.botPos.y
+                );
+            }
         }
     }
 

@@ -80,12 +80,12 @@ export class Boid {
                 return pipe.topPos.y + pipe.topHeight;
             } else if (bottom === 0) {
                 console.log("Top hit from left 1");
-                Game.pipeGenerator.collided();
+                Game.pipeGenerator.collided(pipe);
                 return this.pos.y;
             } else {
                 if (left < bottom) {
                     console.log("Top hit from left 2");
-                    Game.pipeGenerator.collided();
+                    Game.pipeGenerator.collided(pipe);
                     return this.pos.y;
                 } else {
                     console.log("Top hit from bottom 2");
@@ -123,12 +123,12 @@ export class Boid {
                 return pipe.botPos.y - boidHeight;
             } else if (top === 0) {
                 console.log("Bottom hit from left 1");
-                Game.pipeGenerator.collided();
+                Game.pipeGenerator.collided(pipe);
                 return this.pos.y;
             } else {
                 if (left < top) {
                     console.log("Bottom hit from left 2");
-                    Game.pipeGenerator.collided();
+                    Game.pipeGenerator.collided(pipe);
                     return this.pos.y;
                 } else {
                     console.log("Bottom hit from top 2");
