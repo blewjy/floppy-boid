@@ -45,7 +45,6 @@ class Pipe {
         }
     }
     render(context) {
-        context.fillStyle = "green";
         context.fillRect(
             Math.floor(this.topPos.x),
             Math.floor(this.topPos.y),
@@ -143,6 +142,7 @@ export class PipeGenerator {
         }
     }
     render(context) {
+        context.fillStyle = "green";
         this.pipes.forEach(pipe => {
             pipe.render(context);
         });
