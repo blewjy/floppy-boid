@@ -10,14 +10,16 @@ import {
     pipeGap,
     pipeMinHeight,
     pipeMaxHeight,
-    pipeRemoveX
+    pipeRemoveX,
+    gameGroundHeight
 } from "./settings.js";
 import { Game } from "./game.js";
 
 class Pipe {
     constructor(pipeTopHeight) {
         this.topHeight = pipeTopHeight;
-        this.botHeight = gameHeight - pipeTopHeight - pipeHoleHeight;
+        this.botHeight =
+            gameHeight - pipeTopHeight - pipeHoleHeight - gameGroundHeight;
         this.topPos = new Vector2(pipeStartingX, 0);
         this.botPos = new Vector2(
             pipeStartingX,
@@ -45,22 +47,17 @@ class Pipe {
     render(context) {
         context.fillStyle = "green";
         context.fillRect(
-            this.topPos.x,
-            this.topPos.y,
-            pipeWidth,
-            this.topHeight
+            Math.floor(this.topPos.x),
+            Math.floor(this.topPos.y),
+            Math.floor(pipeWidth),
+            Math.floor(this.topHeight)
         );
         context.fillRect(
-            this.botPos.x,
-            this.botPos.y,
-            pipeWidth,
-            this.botHeight
+            Math.floor(this.botPos.x),
+            Math.floor(this.botPos.y),
+            Math.floor(pipeWidth),
+            Math.floor(this.botHeight)
         );
-        context.strokeStyle = "black";
-        context.beginPath();
-        context.moveTo(this.topPos.x + pipeWidth / 2, 0);
-        context.lineTo(this.botPos.x + pipeWidth / 2, gameHeight);
-        context.stroke();
     }
 }
 

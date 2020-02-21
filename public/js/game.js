@@ -8,7 +8,7 @@ export class Game {
         Game.instance = this;
 
         this.canvas = document.getElementById("screen");
-        this.context = this.canvas.getContext("2d");
+        this.context = this.canvas.getContext("2d", { alpha: false });
         this.lastTime = 0;
         this.deltaTime = 0;
 

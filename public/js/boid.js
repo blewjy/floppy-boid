@@ -35,12 +35,12 @@ export class Boid {
 
     render(context) {
         context.fillStyle = "yellow";
-        context.fillRect(this.pos.x, this.pos.y, boidWidth, boidHeight);
-        context.strokeStyle = "black";
-        context.beginPath();
-        context.moveTo(this.pos.x + boidWidth / 2, this.pos.y);
-        context.lineTo(this.pos.x + boidWidth / 2, this.pos.y + boidHeight);
-        context.stroke();
+        context.fillRect(
+            Math.floor(this.pos.x),
+            Math.floor(this.pos.y),
+            Math.floor(boidWidth),
+            Math.floor(boidHeight)
+        );
     }
     jump() {
         this.isStarted = true;
@@ -76,19 +76,15 @@ export class Boid {
             if (left === 0 && bottom === 0) {
                 throw new Error("WTFBBQ");
             } else if (left === 0) {
-                console.log("Top hit from bottom 1");
                 return pipe.topPos.y + pipe.topHeight;
             } else if (bottom === 0) {
-                console.log("Top hit from left 1");
                 Game.pipeGenerator.collided(pipe);
                 return this.pos.y;
             } else {
                 if (left < bottom) {
-                    console.log("Top hit from left 2");
                     Game.pipeGenerator.collided(pipe);
                     return this.pos.y;
                 } else {
-                    console.log("Top hit from bottom 2");
                     return pipe.topPos.y + pipe.topHeight;
                 }
             }
@@ -119,19 +115,15 @@ export class Boid {
             if (left === 0 && top === 0) {
                 throw new Error("WTFBBQ");
             } else if (left === 0) {
-                console.log("Bottom hit from top 1");
                 return pipe.botPos.y - boidHeight;
             } else if (top === 0) {
-                console.log("Bottom hit from left 1");
                 Game.pipeGenerator.collided(pipe);
                 return this.pos.y;
             } else {
                 if (left < top) {
-                    console.log("Bottom hit from left 2");
                     Game.pipeGenerator.collided(pipe);
                     return this.pos.y;
                 } else {
-                    console.log("Bottom hit from top 2");
                     return pipe.botPos.y - boidHeight;
                 }
             }
