@@ -2,11 +2,12 @@ import { Boid } from "./boid.js";
 import { PipeGenerator } from "./pipe.js";
 import { Collider } from "./collider.js";
 import { gameWidth, gameHeight, gameGroundHeight } from "./settings.js";
+import { loadImage } from "./util.js";
 
 export class Game {
-    constructor() {
+    constructor(boidImage, pipeImage) {
         Game.instance = this;
-        
+
         this.screenCanvas = document.getElementById("screen");
         this.screenContext = this.screenCanvas.getContext("2d");
 
@@ -17,8 +18,8 @@ export class Game {
         this.lastTime = 0;
         this.deltaTime = 0;
 
-        this.boid = new Boid();
-        this.pipeGenerator = new PipeGenerator();
+        this.boid = new Boid(boidImage);
+        this.pipeGenerator = new PipeGenerator(pipeImage);
         this.collider = new Collider(this.boid, this.pipeGenerator.pipes);
 
         this.score = 0;
@@ -31,25 +32,30 @@ export class Game {
     }
 
     static init() {
-        new Game();
-        window.addEventListener("keydown", event => {
-            if (event.code === "Space") {
-                Game.boid.jump();
-                Game.pipeGenerator.start();
-                Game.isPipesComing = true;
-            } else if (event.code === "Enter" && Game.isGameOver) {
-                Game.reset();
-                Game.start();
-            }
+        return Promise.all([
+            loadImage("img/boid-mid.png"),
+            loadImage("img/pipe.png")
+        ]).then(([boidImage, pipeImage]) => {
+            new Game(boidImage, pipeImage);
+            window.addEventListener("keydown", event => {
+                if (event.code === "Space") {
+                    Game.boid.jump();
+                    Game.pipeGenerator.start();
+                    Game.isPipesComing = true;
+                } else if (event.code === "Enter" && Game.isGameOver) {
+                    Game.reset();
+                    Game.start();
+                }
+            });
+            window.addEventListener("mousedown", event => {
+                if (event.which === 1) {
+                    Game.boid.jump();
+                    Game.pipeGenerator.start();
+                    Game.isPipesComing = true;
+                }
+            });
+            Game.handleMobile();
         });
-        window.addEventListener("mousedown", event => {
-            if (event.which === 1) {
-                Game.boid.jump();
-                Game.pipeGenerator.start();
-                Game.isPipesComing = true;
-            }
-        });
-        Game.handleMobile();
     }
 
     static handleMobile() {

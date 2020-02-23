@@ -11,10 +11,11 @@ import {
 } from "./settings.js";
 
 export class Boid {
-    constructor() {
+    constructor(boidImage) {
         this.pos = new Vector2(boidStartingX, boidStartingY);
         this.vel = new Vector2(0, 0);
         this.isStarted = false;
+        this.image = boidImage;
     }
 
     reset() {
@@ -34,12 +35,10 @@ export class Boid {
     }
 
     render(context) {
-        context.fillStyle = "yellow";
-        context.fillRect(
+        context.drawImage(
+            this.image,
             Math.floor(this.pos.x),
-            Math.floor(this.pos.y),
-            Math.floor(boidWidth),
-            Math.floor(boidHeight)
+            Math.floor(this.pos.y)
         );
     }
     jump() {

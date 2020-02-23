@@ -11,12 +11,14 @@ import {
     pipeMinHeight,
     pipeMaxHeight,
     pipeRemoveX,
-    gameGroundHeight
+    gameGroundHeight,
+    pipeImageWidth,
+    pipeImageHeight
 } from "./settings.js";
 import { Game } from "./game.js";
 
 class Pipe {
-    constructor(pipeTopHeight) {
+    constructor(pipeTopHeight, topPipeImage, botPipeImage) {
         this.topHeight = pipeTopHeight;
         this.botHeight =
             gameHeight - pipeTopHeight - pipeHoleHeight - gameGroundHeight;
@@ -26,6 +28,8 @@ class Pipe {
             pipeTopHeight + pipeHoleHeight
         );
         this.passed = false;
+        this.topPipeImage = topPipeImage;
+        this.botPipeImage = botPipeImage;
     }
     update(deltaTime) {
         this.topPos.set(
@@ -45,26 +49,46 @@ class Pipe {
         }
     }
     render(context) {
-        context.fillRect(
+        context.drawImage(
+            this.topPipeImage,
             Math.floor(this.topPos.x),
-            Math.floor(this.topPos.y),
-            Math.floor(pipeWidth),
-            Math.floor(this.topHeight)
+            Math.floor(this.topPos.y - pipeImageHeight + this.topHeight)
         );
-        context.fillRect(
+        context.drawImage(
+            this.botPipeImage,
+            0,
+            0,
+            pipeImageWidth,
+            this.botHeight,
             Math.floor(this.botPos.x),
             Math.floor(this.botPos.y),
-            Math.floor(pipeWidth),
-            Math.floor(this.botHeight)
+            pipeImageWidth,
+            this.botHeight
         );
     }
 }
 
 export class PipeGenerator {
-    constructor() {
+    constructor(pipeImage) {
         this.pipes = [];
         this.lastPipe = null;
         this.isStarted = false;
+
+        // Draw top pipe
+        this.topPipeImageBuffer = document.createElement("canvas");
+        this.topPipeImageBuffer.width = pipeImageWidth;
+        this.topPipeImageBuffer.height = pipeImageHeight;
+        const topBufferContext = this.topPipeImageBuffer.getContext("2d");
+        topBufferContext.scale(1, -1);
+        topBufferContext.translate(0, -pipeImageHeight);
+        topBufferContext.drawImage(pipeImage, 0, 0);
+
+        // Draw bottom pipe
+        this.botPipeImageBuffer = document.createElement("canvas");
+        this.botPipeImageBuffer.width = pipeImageWidth;
+        this.botPipeImageBuffer.height = pipeImageHeight;
+        const botBufferContext = this.botPipeImageBuffer.getContext("2d");
+        botBufferContext.drawImage(pipeImage, 0, 0);
     }
 
     reset() {
@@ -117,7 +141,9 @@ export class PipeGenerator {
         if (this.isStarted) {
             if (this.pipes.length === 0) {
                 const pipe = new Pipe(
-                    randomIntFromInterval(pipeMinHeight, pipeMaxHeight)
+                    randomIntFromInterval(pipeMinHeight, pipeMaxHeight),
+                    this.topPipeImageBuffer,
+                    this.botPipeImageBuffer
                 );
                 this.pipes.push(pipe);
                 this.lastPipe = pipe;
@@ -127,7 +153,9 @@ export class PipeGenerator {
                     pipeStartingX - pipeGap - pipeWidth
                 ) {
                     const pipe = new Pipe(
-                        randomIntFromInterval(pipeMinHeight, pipeMaxHeight)
+                        randomIntFromInterval(pipeMinHeight, pipeMaxHeight),
+                        this.topPipeImageBuffer,
+                        this.botPipeImageBuffer
                     );
                     this.pipes.push(pipe);
                     this.lastPipe = pipe;
