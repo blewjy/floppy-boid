@@ -3,6 +3,7 @@ import { PipeGenerator } from "./pipe.js";
 import { Collider } from "./collider.js";
 import { gameWidth, gameHeight, gameGroundHeight } from "./settings.js";
 import { loadImage } from "./util.js";
+import { Timer } from "./timer.js";
 
 export class Game {
     constructor(boidImage, pipeImage) {
@@ -37,6 +38,16 @@ export class Game {
             loadImage("img/pipe.png")
         ]).then(([boidImage, pipeImage]) => {
             new Game(boidImage, pipeImage);
+
+            const timer = new Timer(1 / 100);
+            timer.update = function update(deltaTime) {
+                if (Game.isRunning) {
+                    Game.deltaTime = deltaTime;
+                    Game.loop();
+                }
+            };
+            timer.start();
+
             window.addEventListener("keydown", event => {
                 if (event.code === "Space") {
                     Game.boid.jump();
@@ -98,10 +109,6 @@ export class Game {
     static start() {
         Game.isRunning = true;
         Game.isGameOver = false;
-        if (Game.isRunning) {
-            // Start game loop
-            requestAnimationFrame(timestamp => Game.loop(timestamp));
-        }
     }
 
     static stop() {
@@ -113,11 +120,7 @@ export class Game {
         Game.isGameOver = true;
     }
 
-    static loop(timestamp) {
-        // time management
-        Game.deltaTime = (timestamp - Game.lastTime) / 1000;
-        Game.lastTime = timestamp;
-
+    static loop() {
         // update entities
         Game.boid.update(Game.deltaTime);
         Game.pipeGenerator.update(Game.deltaTime);
@@ -153,10 +156,6 @@ export class Game {
                 Game.isGetReadyCleared = true;
             }
             Game.isFirstDrawDone = true;
-        }
-
-        if (Game.isRunning) {
-            requestAnimationFrame(timestamp => Game.loop(timestamp));
         }
     }
 
