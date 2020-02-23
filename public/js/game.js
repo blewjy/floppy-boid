@@ -6,12 +6,7 @@ import { gameWidth, gameHeight, gameGroundHeight } from "./settings.js";
 export class Game {
     constructor() {
         Game.instance = this;
-
-        this.backgroundCanvas = document.getElementById("background");
-        this.backgroundContext = this.backgroundCanvas.getContext("2d", {
-            alpha: false
-        });
-
+        
         this.screenCanvas = document.getElementById("screen");
         this.screenContext = this.screenCanvas.getContext("2d");
 
@@ -72,9 +67,6 @@ export class Game {
         })(navigator.userAgent || navigator.vendor || window.opera);
 
         if (check) {
-            Game.instance.backgroundCanvas.width = window.innerWidth;
-            Game.instance.backgroundCanvas.height = window.innerHeight;
-
             window.addEventListener("touchstart", () => {
                 if (!Game.isGameOver) {
                     Game.boid.jump();
@@ -101,17 +93,6 @@ export class Game {
         Game.isRunning = true;
         Game.isGameOver = false;
         if (Game.isRunning) {
-            // Draw background on background canvas
-            Game.backgroundContext.fillStyle = "skyblue";
-            Game.backgroundContext.fillRect(0, 0, gameWidth, gameHeight);
-            Game.backgroundContext.fillStyle = "brown";
-            Game.backgroundContext.fillRect(
-                0,
-                gameHeight - gameGroundHeight,
-                gameWidth,
-                gameGroundHeight
-            );
-
             // Start game loop
             requestAnimationFrame(timestamp => Game.loop(timestamp));
         }
@@ -197,10 +178,6 @@ export class Game {
 
     static get collider() {
         return Game.instance.collider;
-    }
-
-    static get backgroundContext() {
-        return Game.instance.backgroundContext;
     }
 
     static get screenContext() {
