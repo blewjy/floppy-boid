@@ -6,7 +6,22 @@ import { loadImage } from "./util.js";
 import { Timer } from "./timer.js";
 
 export class Game {
-    constructor(boidImage, pipeImage) {
+    constructor(
+        boidImage,
+        pipeImage,
+        gameOverImage,
+        getReadyImage,
+        zeroImage,
+        oneImage,
+        twoImage,
+        threeImage,
+        fourImage,
+        fiveImage,
+        sixImage,
+        sevenImage,
+        eightImage,
+        nineImage
+    ) {
         Game.instance = this;
 
         this.screenCanvas = document.getElementById("screen");
@@ -15,6 +30,21 @@ export class Game {
         this.uiCanvas = document.getElementById("ui");
         this.uiContext = this.uiCanvas.getContext("2d");
         this.uiContext.fillStyle = "white";
+
+        this.gameOverImage = gameOverImage;
+        this.getReadyImage = getReadyImage;
+        this.scoreImages = [
+            zeroImage,
+            oneImage,
+            twoImage,
+            threeImage,
+            fourImage,
+            fiveImage,
+            sixImage,
+            sevenImage,
+            eightImage,
+            nineImage
+        ];
 
         this.lastTime = 0;
         this.deltaTime = 0;
@@ -35,38 +65,82 @@ export class Game {
     static init() {
         return Promise.all([
             loadImage("img/boid-mid.png"),
-            loadImage("img/pipe.png")
-        ]).then(([boidImage, pipeImage]) => {
-            new Game(boidImage, pipeImage);
+            loadImage("img/pipe.png"),
+            loadImage("img/gameover.png"),
+            loadImage("img/ready.png"),
+            loadImage("img/0.png"),
+            loadImage("img/1.png"),
+            loadImage("img/2.png"),
+            loadImage("img/3.png"),
+            loadImage("img/4.png"),
+            loadImage("img/5.png"),
+            loadImage("img/6.png"),
+            loadImage("img/7.png"),
+            loadImage("img/8.png"),
+            loadImage("img/9.png")
+        ]).then(
+            ([
+                boidImage,
+                pipeImage,
+                gameOverImage,
+                getReadyImage,
+                zeroImage,
+                oneImage,
+                twoImage,
+                threeImage,
+                fourImage,
+                fiveImage,
+                sixImage,
+                sevenImage,
+                eightImage,
+                nineImage
+            ]) => {
+                new Game(
+                    boidImage,
+                    pipeImage,
+                    gameOverImage,
+                    getReadyImage,
+                    zeroImage,
+                    oneImage,
+                    twoImage,
+                    threeImage,
+                    fourImage,
+                    fiveImage,
+                    sixImage,
+                    sevenImage,
+                    eightImage,
+                    nineImage
+                );
 
-            const timer = new Timer(1 / 100);
-            timer.update = function update(deltaTime) {
-                if (Game.isRunning) {
-                    Game.deltaTime = deltaTime;
-                    Game.loop();
-                }
-            };
-            timer.start();
+                const timer = new Timer(1 / 100);
+                timer.update = function update(deltaTime) {
+                    if (Game.isRunning) {
+                        Game.deltaTime = deltaTime;
+                        Game.loop();
+                    }
+                };
+                timer.start();
 
-            window.addEventListener("keydown", event => {
-                if (event.code === "Space") {
-                    Game.boid.jump();
-                    Game.pipeGenerator.start();
-                    Game.isPipesComing = true;
-                } else if (event.code === "Enter" && Game.isGameOver) {
-                    Game.reset();
-                    Game.start();
-                }
-            });
-            window.addEventListener("mousedown", event => {
-                if (event.which === 1) {
-                    Game.boid.jump();
-                    Game.pipeGenerator.start();
-                    Game.isPipesComing = true;
-                }
-            });
-            Game.handleMobile();
-        });
+                window.addEventListener("keydown", event => {
+                    if (event.code === "Space") {
+                        Game.boid.jump();
+                        Game.pipeGenerator.start();
+                        Game.isPipesComing = true;
+                    } else if (event.code === "Enter" && Game.isGameOver) {
+                        Game.reset();
+                        Game.start();
+                    }
+                });
+                window.addEventListener("mousedown", event => {
+                    if (event.which === 1) {
+                        Game.boid.jump();
+                        Game.pipeGenerator.start();
+                        Game.isPipesComing = true;
+                    }
+                });
+                Game.handleMobile();
+            }
+        );
     }
 
     static handleMobile() {
@@ -131,7 +205,7 @@ export class Game {
         // render
         if (!Game.isFirstDrawDone || Game.isPipesComing) {
             if (!Game.isFirstDrawDone) {
-                Game.uiContext.clearRect(0, 170, gameWidth, 80);
+                Game.clearGameOver();
             }
 
             Game.screenContext.clearRect(0, 0, gameWidth, gameHeight);
@@ -139,36 +213,68 @@ export class Game {
             Game.boid.render(Game.screenContext);
 
             if (Game.isGameOver) {
-                Game.uiContext.fillText("Game Over!", gameWidth / 2, 200);
-                Game.uiContext.font = "30px Georgia";
-                Game.uiContext.fillText(
-                    'Press "Enter" to restart',
-                    gameWidth / 2,
-                    250
-                );
+                Game.drawGameOver();
             }
 
             if (!Game.isFirstDrawDone) {
+                Game.clearScore();
                 Game.drawScore();
-                Game.uiContext.fillText("Get Ready", gameWidth / 2, 200);
+                Game.drawGetReady();
             } else if (!Game.isGameOver && !Game.isGetReadyCleared) {
-                Game.uiContext.clearRect(85, 170, 230, 40);
-                Game.isGetReadyCleared = true;
+                Game.clearGetReady();
             }
             Game.isFirstDrawDone = true;
         }
     }
 
+    static drawGetReady() {
+        Game.uiContext.drawImage(Game.getReadyImage, 108, 130);
+    }
+
+    static clearGetReady() {
+        Game.uiContext.clearRect(108, 130, 184, 207);
+        Game.isGetReadyCleared = true;
+    }
+
+    static drawGameOver() {
+        Game.uiContext.drawImage(this.gameOverImage, 104, 200);
+    }
+
+    static clearGameOver() {
+        Game.uiContext.clearRect(0, 170, gameWidth, 80);
+    }
+
     static addScore() {
         Game.instance.score += 1;
+        Game.clearScore();
         Game.drawScore();
     }
 
     static drawScore() {
-        Game.uiContext.font = "bold 40px Georgia";
-        Game.uiContext.textAlign = "center";
-        Game.uiContext.clearRect(gameWidth / 4, 25, gameWidth / 2, 50);
-        Game.uiContext.fillText(Game.score, gameWidth / 2, 60);
+        const scoreString = Game.score.toString();
+        let totalWidth = 0;
+
+        [...scoreString].forEach(c => {
+            if (c === "1") {
+                totalWidth += 16;
+            } else {
+                totalWidth += 24;
+            }
+        });
+
+        let posX = (400 - totalWidth) / 2;
+        [...scoreString].forEach(c => {
+            Game.uiContext.drawImage(Game.scoreImages[parseInt(c)], posX, 30);
+            if (c === "1") {
+                posX += 14;
+            } else {
+                posX += 22;
+            }
+        });
+    }
+
+    static clearScore() {
+        Game.uiContext.clearRect(100, 30, 200, 36);
     }
 
     // Static getters and setters
@@ -255,5 +361,17 @@ export class Game {
 
     static set score(score) {
         Game.instance.score = score;
+    }
+
+    static get gameOverImage() {
+        return Game.instance.gameOverImage;
+    }
+
+    static get getReadyImage() {
+        return Game.instance.getReadyImage;
+    }
+
+    static get scoreImages() {
+        return Game.instance.scoreImages;
     }
 }

@@ -2,7 +2,7 @@ export const gameWidth = 400;
 export const gameHeight = 600;
 export const gameGroundHeight = 50;
 
-export const boidStartingX = 150;
+export const boidStartingX = 130;
 export const boidStartingY = 250;
 export const boidWidth = 34;
 export const boidHeight = 24;
